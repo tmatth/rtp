@@ -104,6 +104,8 @@ type AV1Packet struct {
 	// Each AV1 RTP Packet is a collection of OBU Elements. Each OBU Element may be a full OBU, or just a fragment of one.
 	// AV1Frame provides the tools to construct a collection of OBUs from a collection of OBU Elements
 	OBUElements [][]byte
+
+	videoDepacketizer
 }
 
 // Unmarshal parses the passed byte slice and stores the result in the AV1Packet this method is called upon
@@ -155,4 +157,12 @@ func (p *AV1Packet) Unmarshal(payload []byte) ([]byte, error) {
 	}
 
 	return payload[1:], nil
+}
+
+// IsPartitionHead checks whether this is a head of the AV1 partition
+func (*AV1Packet) IsPartitionHead(payload []byte) bool {
+       if len(payload) < 1 {
+               return false
+       }
+       return (payload[0] & 0x08) != 0
 }
